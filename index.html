@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎤 แปลงเสียงเป็นข้อความ | บริการสำหรับผู้ไม่สะดวกพิมพ์</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Sarabun', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(145deg, #f6f9fc 0%, #e6f0f5 100%);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+        .card {
+            max-width: 750px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            border-radius: 48px 48px 32px 32px;
+            box-shadow: 0 20px 40px rgba(0, 30, 50, 0.2), 0 8px 16px rgba(0, 20, 30, 0.1);
+            padding: 32px 28px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.2s ease;
+        }
+        h1 {
+            font-size: 2.4rem;
+            margin: 0 0 8px 0;
+            color: #0a3e5c;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.6);
+        }
+        h1 span {
+            font-size: 3rem;
+            line-height: 1;
+        }
+        .subhead {
+            text-align: center;
+            color: #1b5e7a;
+            font-size: 1.2rem;
+            margin: 0 0 24px 0;
+            background: #d9eef9;
+            padding: 12px 20px;
+            border-radius: 60px;
+            display: inline-block;
+            width: auto;
+            margin-left: auto;
+            margin-right: auto;
+            border: 1px solid #b0d4e8;
+            box-shadow: inset 0 1px 4px white;
+        }
+        .emojis-row {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            font-size: 2rem;
+            margin: 16px 0 20px;
+            filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.1));
+        }
+        .emojis-row span {
+            background: #ffffffbb;
+            padding: 8px 16px;
+            border-radius: 60px;
+            border: 1px solid white;
+            backdrop-filter: blur(2px);
+        }
+
+        /* คำแนะนำง่าย ๆ ก่อนใช้งาน */
+        .quick-guide {
+            background: #e2f0fa;
+            border-radius: 28px;
+            padding: 18px 22px;
+            margin: 0 0 25px 0;
+            border: 2px solid #bfddf0;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-around;
+            gap: 16px 8px;
+            box-shadow: 0 6px 0 #9ebed0;
+        }
+        .guide-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.2rem;
+            background: white;
+            padding: 8px 22px;
+            border-radius: 50px;
+            border: 1px solid #cde1ed;
+            box-shadow: inset 0 1px 4px white;
+        }
+        .guide-item span:first-child {
+            font-size: 2rem;
+        }
+        .guide-item span:last-child {
+            color: #044763;
+            font-weight: 500;
+        }
+
+        .transcript-box {
+            background: #ffffffdd;
+            border: 3px solid #cbe5f1;
+            border-radius: 36px;
+            padding: 28px 22px;
+            min-height: 200px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 1.6rem;
+            line-height: 1.5;
+            color: #0a3345;
+            margin: 10px 0 20px;
+            box-shadow: inset 0 6px 12px rgba(0,30,40,0.1), 0 8px 18px rgba(0,60,80,0.1);
+            transition: background 0.2s;
+            scroll-behavior: smooth;
+            word-break: break-word;
+        }
+        .transcript-box:focus {
+            outline: none;
+            border-color: #ffb56b;
+        }
+        .transcript-placeholder {
+            opacity: 0.5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.4rem;
+        }
+        .placeholder-emoji {
+            font-size: 3rem;
+            filter: grayscale(0.3);
+        }
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 14px;
+            margin: 16px 0 10px;
+        }
+        .btn {
+            border: none;
+            background: white;
+            padding: 18px 32px;
+            border-radius: 50px;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #115277;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            box-shadow: 0 8px 0 #0a3e5c, 0 12px 22px rgba(0, 50, 70, 0.25);
+            cursor: pointer;
+            transition: all 0.1s ease-out;
+            border: 2px solid #cae1ed;
+            flex: 1 1 auto;
+            min-width: 200px;
+        }
+        .btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #0a3e5c, 0 8px 18px rgba(0, 50, 70, 0.2);
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            transform: translateY(0);
+            box-shadow: 0 4px 0 #5f7e8f;
+            pointer-events: none;
+            filter: grayscale(0.3);
+        }
+        .btn-primary {
+            background: #ffd966;
+            color: #1d4e6b;
+            box-shadow: 0 8px 0 #b2781a, 0 12px 22px rgba(0, 50, 70, 0.25);
+            border-color: #ffe49e;
+        }
+        .btn-stop {
+            background: #f4b8a4;
+            color: #631e0c;
+            box-shadow: 0 8px 0 #aa4a2c, 0 12px 22px rgba(0, 50, 70, 0.25);
+            border-color: #fcd5c0;
+        }
+        .btn-clear {
+            background: #c8e0ec;
+            color: #115277;
+            box-shadow: 0 6px 0 #5b8aa3;
+            border-color: #ddf0fa;
+        }
+        .status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 1.3rem;
+            margin: 24px 0 0;
+            padding: 12px;
+            background: #e2f0f7;
+            border-radius: 60px;
+            border: 1px solid #b3d6e9;
+            color: #07415b;
+        }
+        .listening-indicator {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background: #2ecc71;
+            border-radius: 50%;
+            box-shadow: 0 0 0 4px rgba(46, 204, 113, 0.3);
+            animation: pulse 1.2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.2); background: #f1c40f; }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .error-msg {
+            background: #fee4d6;
+            border-radius: 40px;
+            padding: 16px;
+            color: #a22810;
+            font-size: 1.2rem;
+            text-align: center;
+            border: 1px solid #ffa577;
+            margin-top: 16px;
+        }
+        footer {
+            text-align: center;
+            margin-top: 24px;
+            color: #527a8f;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>
+        <span>🗣️➡️📝</span>  พูดเลย.. เราจัดให้
+    </h1>
+    <div class="subhead">
+        <span>✨</span> สำหรับผู้ไม่สะดวกพิมพ์ หรือเขียน <span>✨</span>
+    </div>
+
+    <!-- แถวอิโมจิภาพ -->
+    <div class="emojis-row">
+        <span>😊🙏</span>
+        <span>🎤💬</span>
+        <span>🦻📋</span>
+        <span>✅✨</span>
+    </div>
+
+    <!-- 🆕 คำแนะนำง่าย ๆ ก่อนใช้งาน (เพิ่มตามคำขอ) -->
+    <div class="quick-guide">
+        <div class="guide-item">
+            <span>①🎤</span>
+            <span>กดปุ่ม "เริ่มฟัง"</span>
+        </div>
+        <div class="guide-item">
+            <span>②🗣️</span>
+            <span>พูดใกล้ไมโครโฟน ชัด ๆ</span>
+        </div>
+        <div class="guide-item">
+            <span>③📋</span>
+            <span>ข้อความจะปรากฏทันที</span>
+        </div>
+        <div style="width:100%; text-align:center; color:#0b4e6f; font-size:1.1rem; margin-top:4px;">
+            ⚡ อนุญาตให้เบราว์เซอร์ใช้ไมโครโฟนเมื่อขึ้นคำขอ ⚡
+        </div>
+    </div>
+
+    <!-- กล่องแสดงข้อความจากเสียง -->
+    <div class="transcript-box" id="transcriptBox" role="region" aria-live="polite">
+        <div class="transcript-placeholder" id="placeholder">
+            <span class="placeholder-emoji">🎤 🗨️  </span>
+            <span>กดปุ่มไมค์ แล้วพูด...</span>
+            <span style="font-size:1rem;">(พูดภาษาไทย หรือ ภาษาอังกฤษ ก็ได้)</span>
+        </div>
+        <div id="finalContent" style="display: inline;"></div>
+        <span id="interimContent"></span>
+    </div>
+
+    <!-- ปุ่มควบคุม -->
+    <div class="button-group">
+        <button class="btn btn-primary" id="startBtn">
+            <span>🎤</span> เริ่มฟัง
+        </button>
+        <button class="btn btn-stop" id="stopBtn" disabled>
+            <span>🛑</span> หยุดฟัง
+        </button>
+        <button class="btn btn-clear" id="clearBtn">
+            <span>🧹🗑️</span> ล้างข้อความ
+        </button>
+    </div>
+
+    <!-- สถานะและการแสดงผลขณะฟัง -->
+    <div class="status" id="statusArea">
+        <span>🔇</span> <span id="statusText">พร้อมทำงาน กดปุ่มเริ่มฟังเลย</span>
+        <span id="liveIndicator" style="display: none;" class="listening-indicator"></span>
+    </div>
+
+    <!-- ข้อความแจ้งเตือน (บราวเซอร์ไม่รองรับ หรือ error) -->
+    <div id="errorMessage" class="error-msg" style="display: none;"></div>
+
+    <footer>
+        <span>🧑‍🤝‍🧑</span> บริการสำหรับทุกคน • ใช้เทคโนโลยีแปลงเสียงในตัว <span>🌐</span>
+    </footer>
+</div>
+
+<script>
+    (function() {
+        // ตรวจสอบการรองรับ SpeechRecognition
+        window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition;
+
+        // ถ้าไม่รองรับ ให้แจ้งเตือนและปิดการใช้งาน
+        if (!window.SpeechRecognition) {
+            showError('เบราว์เซอร์ของคุณไม่รองรับการแปลงเสียงเป็นข้อความ 😓 ลองใช้ Chrome, Edge หรือ Safari ล่าสุดนะ', true);
+            disableButtons();
+        }
+
+        // รับ elements
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const transcriptBox = document.getElementById('transcriptBox');
+        const placeholderDiv = document.getElementById('placeholder');
+        const finalDiv = document.getElementById('finalContent');
+        const interimSpan = document.getElementById('interimContent');
+        const statusText = document.getElementById('statusText');
+        const liveIndicator = document.getElementById('liveIndicator');
+        const errorDiv = document.getElementById('errorMessage');
+
+        let recognition = null;
+        let isListening = false;
+        let finalTranscript = '';    // ข้อความที่ยืนยันแล้ว (final)
+        let timeoutId = null;
+
+        // เริ่มต้นอ็อบเจ็กต์ recognition ถ้ารองรับ
+        if (window.SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;          // ฟังต่อเนื่อง
+            recognition.interimResults = true;       // แสดงผลระหว่างพูด
+            recognition.lang = 'th-TH';              // ภาษาไทย (รองรับอังกฤษด้วย)
+            recognition.maxAlternatives = 1;
+        }
+
+        // แสดง error
+        function showError(msg, disable = false) {
+            errorDiv.style.display = 'block';
+            errorDiv.innerHTML = `⚠️ ${msg}`;
+            if (disable) {
+                startBtn.disabled = true;
+                stopBtn.disabled = true;
+            }
+        }
+
+        function hideError() {
+            errorDiv.style.display = 'none';
+        }
+
+        function disableButtons() {
+            startBtn.disabled = true;
+            stopBtn.disabled = true;
+        }
+
+        // อัปเดตข้อความในกล่องแสดงผล
+        function updateDisplay() {
+            // ถ้าทั้ง final และ interim ว่างเปล่า ให้แสดง placeholder
+            if (finalTranscript === '' && interimSpan.innerText === '') {
+                placeholderDiv.style.display = 'flex';
+                finalDiv.style.display = 'none';
+            } else {
+                placeholderDiv.style.display = 'none';
+                finalDiv.style.display = 'inline';
+                finalDiv.innerText = finalTranscript;
+            }
+        }
+
+        // เตรียมเริ่มฟัง
+        function startListening() {
+            hideError();
+            if (!recognition) {
+                showError('ไม่รองรับการฟังในเบราว์เซอร์นี้', true);
+                return;
+            }
+
+            // ล้าง timer เก่าถ้ามี
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+                timeoutId = null;
+            }
+
+            try {
+                recognition.start();
+                isListening = true;
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                statusText.innerText = 'กำลังฟัง... พูดได้เลย';
+                liveIndicator.style.display = 'inline-block';
+                // เปลี่ยนสีพื้นหลังนิดหน่อย
+                transcriptBox.style.background = '#fff9e6';
+            } catch (e) {
+                console.warn('recognition start error:', e);
+                // อาจจะเริ่มซ้อนกัน ให้ลองหยุดก่อน
+                if (e.name === 'InvalidStateError') {
+                    recognition.stop();
+                    setTimeout(() => {
+                        recognition.start();
+                    }, 200);
+                } else {
+                    showError('เกิดข้อผิดพลาดในการเริ่มฟัง กรุณาลองใหม่', false);
+                    resetButtons();
+                }
+            }
+        }
+
+        function stopListening() {
+            if (recognition && isListening) {
+                recognition.stop();
+                isListening = false;
+            }
+            resetButtons();
+        }
+
+        function resetButtons() {
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            statusText.innerText = 'หยุดฟังแล้ว, กดปุ่มไมค์เพื่อเริ่มใหม่';
+            liveIndicator.style.display = 'none';
+            transcriptBox.style.background = '#ffffffdd';
+        }
+
+        // เหตุการณ์เมื่อได้ผลลัพธ์จาก SpeechRecognition
+        if (recognition) {
+            recognition.onresult = (event) => {
+                // เก็บ interim result ไว้ชั่วคราว
+                let interimTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        // ต่อ final result เข้ากับข้อความหลัก (เพิ่มช่องว่างเล็กน้อย)
+                        finalTranscript += transcript + ' ';
+                        // อัปเดต finalDiv โดยตรง
+                        finalDiv.innerText = finalTranscript;
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+
+                // แสดง interim
+                interimSpan.innerText = interimTranscript;
+
+                // ถ้ามี interim ให้ซ่อน placeholder (จัดการผ่าน updateDisplay)
+                if (finalTranscript !== '' || interimTranscript !== '') {
+                    placeholderDiv.style.display = 'none';
+                    finalDiv.style.display = 'inline';
+                } else {
+                    placeholderDiv.style.display = 'flex';
+                    finalDiv.style.display = 'none';
+                }
+
+                // เลื่อนกล่องข้อความไปด้านล่างสุดอัตโนมัติ
+                transcriptBox.scrollTop = transcriptBox.scrollHeight;
+            };
+
+            recognition.onerror = (event) => {
+                console.warn('Speech recognition error', event.error);
+                let errorMsg = '';
+                switch (event.error) {
+                    case 'no-speech':
+                        errorMsg = '🙉 ไม่ได้ยินเสียง ลองพูดอีกครั้ง';
+                        break;
+                    case 'audio-capture':
+                        errorMsg = '🎤 ไม่พบไมโครโฟน ตรวจสอบการเชื่อมต่อ';
+                        break;
+                    case 'not-allowed':
+                        errorMsg = '🚫 ไม่อนุญาตให้ใช้ไมโครโฟน กรุณาให้สิทธิ์';
+                        break;
+                    default:
+                        errorMsg = `😵 ข้อผิดพลาด: ${event.error}`;
+                }
+                statusText.innerText = errorMsg;
+                showError(errorMsg);
+                resetButtons();
+                isListening = false;
+                transcriptBox.style.background = '#ffffffdd';
+                liveIndicator.style.display = 'none';
+            };
+
+            recognition.onend = () => {
+                // ถ้ายังอยู่ในสถานะ listening (เกิดจากบัคหรือ自動หยุด) ให้ปรับปุ่ม
+                if (isListening) {
+                    // อาจจะเริ่มใหม่โดยอัตโนมัติ? เราไม่เริ่มอัตโนมัติเพื่อให้ผู้ใช้ควบคุม
+                    isListening = false;
+                }
+                resetButtons();
+                transcriptBox.style.background = '#ffffffdd';
+                liveIndicator.style.display = 'none';
+                // อัปเดต placeholder หากไม่มีข้อความ
+                updateDisplay();
+            };
+        }
+
+        // เริ่มฟังเมื่อกดปุ่ม start
+        startBtn.addEventListener('click', () => {
+            // ถ้าไมโครโฟนยัง active อยู่ให้หยุดก่อน
+            if (isListening) {
+                stopListening();
+            }
+            startListening();
+        });
+
+        stopBtn.addEventListener('click', stopListening);
+
+        clearBtn.addEventListener('click', () => {
+            // ล้างข้อความทั้งหมด
+            finalTranscript = '';
+            finalDiv.innerText = '';
+            interimSpan.innerText = '';
+            updateDisplay();  // แสดง placeholder กลับมา
+            // ถ้ากำลังฟังอยู่ ไม่ต้องหยุด แค่ล้างข้อความ
+            transcriptBox.scrollTop = 0;
+            // ซ่อน error ถ้ามี
+            hideError();
+        });
+
+        // อัปเดต placeholder เริ่มต้น
+        updateDisplay();
+
+        // ป้องกันการกดปุ่มซ้อนขณะฟัง (double start)
+        // ฟังก์ชันสำหรับ reset สถานะもし browser โหลดซ้ำ
+        window.addEventListener('load', () => {
+            if (recognition) {
+                // บางครั้ง recognition ค้าง ให้ลอง reset
+                try { recognition.abort(); } catch (e) {}
+            }
+            resetButtons();
+        });
+
+        // ถ้าผู้ใช้คลิกที่กล่องข้อความ ให้ copy ได้ง่าย
+        transcriptBox.addEventListener('click', () => {
+            // สร้าง selection ที่ข้อความทั้งหมด? แต่ไม่จำเป็น แค่ทำให้ copy สะดวก
+        });
+
+        // กรณีออกจากหน้า ให้หยุดฟัง
+        window.addEventListener('beforeunload', () => {
+            if (recognition && isListening) {
+                recognition.abort();
+            }
+        });
+
+        // ฟังก์ชันอัปเดตทั่วไป (ใช้ใน clear แล้ว)
+        function updateDisplay() {
+            if (finalTranscript === '' && interimSpan.innerText === '') {
+                placeholderDiv.style.display = 'flex';
+                finalDiv.style.display = 'none';
+            } else {
+                placeholderDiv.style.display = 'none';
+                finalDiv.style.display = 'inline';
+                finalDiv.innerText = finalTranscript;
+            }
+        }
+    })();
+</script>
+
+<!-- หมายเหตุ: รองรับภาษาไทยและอังกฤษ เบราว์เซอร์ Chrome, Edge, Safari ควรใช้งานได้ดี -->
+</body>
+</html>
